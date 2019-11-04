@@ -43,6 +43,7 @@ def get_moments(d):
     final = torch.cat((mean.reshape(1,), std.reshape(1,), skews.reshape(1,), kurtoses.reshape(1,)))
     return final
 
+#make a dataset class
 class gauss_and_random_dataset(Dataset):
 	def __init__(self, gauss_sampler, random_sampler, N, cardinality):
 		self.samples = []
@@ -60,10 +61,8 @@ class gauss_and_random_dataset(Dataset):
 		
 	def __getitem__(self, idx):
 		return self.samples[idx]
-		
-trainingset = gauss_and_random_dataset(get_distribution_sampler, get_generator_input_sampler, N_training, cardinality)
-validationset=gauss_and_random_dataset(get_distribution_sampler, get_generator_input_sampler, 2000, cardinality)
-
+	
+#defines the neural network	
 class Discriminator(nn.Module):
 	def __init__(self, input_size, hidden_sizes, output_size, f):
 		super(Discriminator, self).__init__()
@@ -76,7 +75,8 @@ class Discriminator(nn.Module):
 		x = self.f(self.map1(x))
 		x = self.f(self.map2(x))
 		return self.f(self.map3(x))
-		
+
+#trains the nn		
 def train():		
 	d = Discriminator(input_size = input_size,
 							hidden_sizes = hidden_sizes,
@@ -109,7 +109,8 @@ def train():
 			running_loss += loss.item()
 	print("\nTraining Time (in minutes) = ",(time()-time0)/60)
 	torch.save({'state_dict': d.state_dict()}, 'gaussian_discriminator.pt')
-	
+
+#validates the nn	
 def validate():
 
 	validation_data = gauss_and_random_dataset(get_distribution_sampler, get_generator_input_sampler, 2000, cardinality)
